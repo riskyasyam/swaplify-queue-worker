@@ -1,0 +1,21 @@
+{
+  "name": "swaplify-queue-worker",
+  "version": "1.0.0",
+  "description": "Queue worker service for Swaplify NSQ processing",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["nsq", "queue", "worker", "facefusion"],
+  "author": "Asyam",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "nsqjs": "^0.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
