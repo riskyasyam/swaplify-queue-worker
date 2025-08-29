@@ -43,6 +43,28 @@ reader.on('message', async (msg) => {
     job = JSON.parse(msg.body.toString());
     console.log(`📨 Received job from NSQ: jobId=${job.jobId}, sourceAssetId=${job.sourceAssetId}, targetAssetId=${job.targetAssetId}`);
 
+    // Cek status job di NestJS
+    let jobDetail;
+    try {
+      jobDetail = await axios.get(`${NEST_API_URL}/jobs/${job.jobId}`, {
+        headers: { 'X-Internal-Secret': INTERNAL_SECRET }
+      });
+    } catch (err) {
+      if (err?.response && (err.response.status === 401 || err.response.status === 404)) {
+        console.error(`❌ Error fetching job detail: ${err.response.status} - requeue once`);
+        msg.requeue(30000); // Retry once after 30s
+        return;
+      }
+      throw err;
+    }
+    
+    const status = jobDetail.data.status;
+    if (status !== 'QUEUED' && status !== 'RUNNING') {
+      console.log(`⏩ Job ${job.jobId} status is ${status}, skipping processing.`);
+      msg.finish();
+      return;
+    }
+
     // Get asset details from NestJS API
     console.log(`🔄 Fetching asset details for jobId=${job.jobId} from NestJS...`);
     const sourceAsset = await axios.get(`${NEST_API_URL}/media-assets/${job.sourceAssetId}`, {
