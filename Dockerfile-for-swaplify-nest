@@ -1,0 +1,49 @@
+# ============================================
+# Dockerfile untuk swaplify-nest + queue-worker
+# Copy file ini ke project swaplify-nest dan ganti Dockerfile yang ada
+# ============================================
+
+# Use Node.js 18 LTS
+FROM node:18-alpine
+
+# Install PM2 globally
+RUN npm install -g pm2
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json files
+COPY package*.json ./
+COPY queue-worker/package*.json ./queue-worker/
+
+# Install main app dependencies
+RUN npm ci --only=production
+
+# Install queue-worker dependencies
+WORKDIR /app/queue-worker
+RUN npm ci --only=production
+
+# Go back to app root
+WORKDIR /app
+
+# Copy source code
+COPY . .
+
+# Build NestJS application
+RUN npm run build
+
+# Create logs directory
+RUN mkdir -p logs
+
+# Make scripts executable
+RUN chmod +x start.sh
+
+# Expose port
+EXPOSE 3000
+
+# Health check for both services
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD pm2 list | grep -E "(nestjs-app|queue-worker)" | grep -E "online" | wc -l | grep -q "2"
+
+# Start with PM2
+CMD ["./start.sh"]

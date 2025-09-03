@@ -1,0 +1,17 @@
+services:
+  queue-worker:
+    build: .
+    container_name: swaplify-queue-worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NSQ_TOPIC=${NSQ_TOPIC:-facefusion_jobs}
+      - NSQ_CHANNEL=${NSQ_CHANNEL:-facefusion_worker}
+      - NSQ_HOST=${NSQ_HOST:-host.docker.internal}
+      - NSQ_PORT=${NSQ_PORT:-4150}
+      - NEST_API_URL=${NEST_API_URL:-http://host.docker.internal:3000}
+      - WORKER_URL=${WORKER_URL:-http://host.docker.internal:8081/worker/facefusion}
+      - WORKER_SHARED_SECRET=${WORKER_SHARED_SECRET:-supersecret}
+      - INTERNAL_SECRET=${INTERNAL_SECRET:-internalsecret}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -5,7 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "docker:build": "docker build -t swaplify-queue-worker .",
+    "docker:run": "docker run -d --name swaplify-queue-worker --env-file .env --add-host=host.docker.internal:host-gateway swaplify-queue-worker",
+    "docker:logs": "docker logs -f swaplify-queue-worker",
+    "docker:stop": "docker stop swaplify-queue-worker && docker rm swaplify-queue-worker",
+    "worker:start": "docker-compose up -d --build",
+    "worker:stop": "docker-compose down",
+    "worker:logs": "docker logs -f swaplify-queue-worker",
+    "worker:restart": "docker-compose restart"
   },
   "keywords": ["nsq", "queue", "worker", "facefusion"],
   "author": "Asyam",
